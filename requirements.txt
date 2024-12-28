@@ -1,0 +1,4 @@
+crewai==0.85.0
+langgraph
+langchain-community
+python-dotenv
