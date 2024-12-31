@@ -1,3 +1,4 @@
+import json
 from langchain.tools import tool, BaseTool
 import os, requests
 from langchain_ollama import OllamaLLM
@@ -144,7 +145,7 @@ class VirusTotalTool:
     
         return str(data)
 
-    @tool("VirusTotal scan communicating files", return_direct=False)
+    @tool("VirusTotal scan communicating files", return_direct=True)
     def scan_related_files(resource: str, scan_type: str = 'ip'):
         """Useful tool to retrieve communicating files for an IP address using VirusTotal
         Parameters:
@@ -201,12 +202,13 @@ class VirusTotalTool:
         max_tokens=100,
 		)
         
-        aggregated_chunks = "Scan results for files that communicate with the IP address: \n"
+        aggregated_chunks = f"Scan results for files that communicate with {resource}: \n"
 
         for i in range(len(data['data'])):
             if 'attributes' in data['data'][i] and 'last_analysis_results' in data['data'][i]['attributes']:
                 # Remove 'last_analysis_results' key from attributes
                 del data['data'][i]['attributes']['last_analysis_results']
-                # aggregated_chunks += llm.invoke("Summarize the following VirusTotal test result in key bullet points only, while preserving the important information: " + str(data['data'][i])) + "\n"
+                aggregated_chunks += llm.invoke(f"This is a log entry for a VirusTotal scan result. Shorten this log entry keeping only the important information about the result : " + str(data['data'][i])) + "\n"
+                # aggregated_chunks += llm.invoke(f"The following is a VirusTotal scan for communicating file with the IOC {resource}. Your role is to summarize the result in key bullet points only, while preserving the important information that might help regarding our analysis:" + str(data['data'][i])) + "\n"
     
-        return str(data['data'])
+        return aggregated_chunks

@@ -45,7 +45,29 @@ class InvestigationTasks:
 				Use past task results to draft a comprehensive report.
 				Your final answer MUST be a detailed report of the investigation results.
 				"""),
-			expected_output="Comprehensive report of the investigation results, detailing and analysing each tasks's results;",
+			expected_output=dedent(f"""\
+			Investigation Report: IOC Analysis of {iocs}
+
+			Introduction:
+			- Briefly describe the subject of the investigation (e.g., IP address, domain, file hash).
+			- Mention the reason for the investigation and the objective of the report.
+
+			Methodology:
+			- Explain the tools and methods used in the investigation (e.g., VirusTotal, sandbox analysis, malware databases).
+			- Include details about specific technologies or approaches (e.g., sandbox environments, behavioral analysis).
+
+			Findings:
+			- Describe the key findings of the investigation.
+			- Include details such as the nature of the files, their classification, and any associated behaviors observed during the analysis.
+
+			Analysis & Recommendations:
+			- Summarize the implications of the findings (e.g., potential malicious activities).
+			- Provide actionable recommendations (e.g., further investigation steps, mitigation measures).
+
+			Conclusion:
+			- Restate the main findings and their significance.
+			- Highlight the need for additional actions or monitoring if necessary.
+			"""),
 			agent=agent
 		)
 

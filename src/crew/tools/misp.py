@@ -1,7 +1,7 @@
 from langchain.tools import tool, BaseTool
 
 class MISPSearchTool():
-    @tool("MISP search tool", return_direct=False)
+    @tool("MISP search tool", return_direct=True)
     def search_misp(iocs):
         """Search for Indicators of Compromise (IOCs) in MISP
         Parameters:
