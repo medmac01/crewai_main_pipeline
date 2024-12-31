@@ -1,11 +1,13 @@
 from textwrap import dedent
 from crewai import Agent, LLM
-from .tools import CreateDraftTool
+from .tools.virustotal import VirusTotalTool
+from .tools.misp import MISPSearchTool
 
 class InvestigateAgents():
 	def __init__(self):
 		self.llm = LLM(
-    	model="ollama/openhermes",
+    	# model="ollama/hf.co/MaziyarPanahi/Mistral-Nemo-Instruct-2407-GGUF:Q4_K_M",
+		model="ollama/codestral",
     	base_url="http://localhost:11434"
 		)
 
@@ -17,7 +19,7 @@ class InvestigateAgents():
 				As a MISP Search Specialist, you are skilled in searching for Indicators of Compromise (IOCs) in MISP (Malware Information Sharing Platform)."""),
 			verbose=True,
 			llm = self.llm,
-			tools=[],
+			tools=[MISPSearchTool().search_misp],
 			allow_delegation=False
 		)
 
@@ -29,7 +31,18 @@ class InvestigateAgents():
 				As a VirusTotal Search Specialist, you are skilled in searching for Indicators of Compromise (e.g. IP addresses, domains, hashes) in VirusTotal."""),
 			verbose=True,
 			llm = self.llm,
-			tools=[],
+			tools = [VirusTotalTool().scan_related_files],
+			allow_delegation=False
+		)
+
+	def draft_report(self):
+		return Agent(
+			role='Report Drafting Specialist',
+			goal='Draft a detailed report of the investigation results',
+			backstory=dedent("""\
+				As a Report Drafting Specialist, you are skilled in drafting detailed reports based on the investigation results."""),
+			verbose=True,
+			llm = self.llm,
 			allow_delegation=False
 		)
 
