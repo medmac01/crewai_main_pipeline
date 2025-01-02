@@ -11,6 +11,7 @@ def merge_dicts(d1, d2):
 class InvestigationState(TypedDict):
 	# input : str
 	iocs : list[str]
+	hypothesis: str
 	history : Annotated[dict, merge_dicts]
 	intermediate_steps: Annotated[list[tuple[AgentAction, str]], operator.add]
 

@@ -16,7 +16,7 @@ class Investigator():
 		tasks = InvestigationTasks()
 		llm = LLM(
     	# model="ollama/hf.co/MaziyarPanahi/Mistral-Nemo-Instruct-2407-GGUF:Q4_K_M",
-    	model="ollama/codestral",
+    	model="ollama/mistral",
     	base_url="http://localhost:11434"
 		)
 		crew = Crew(
@@ -24,7 +24,7 @@ class Investigator():
 			tasks=[
 				tasks.misp_search_task(self.misp_agent, state['iocs']),
 				tasks.virus_total_search_task(self.virus_total_agent, state['iocs']),
-				tasks.draft_report_task(self.report_agent, state['iocs'])
+				tasks.draft_report_task(self.report_agent, state['iocs'], state['hypothesis'])
 
 			],
 			name="Investigation process",
@@ -34,8 +34,9 @@ class Investigator():
 			manager_llm=llm,
 			output_log_file="investigation_output.log",
 			process = Process.sequential,
-			planning = True,
-			planning_llm = llm
+			# planning = True,
+			# planning_llm = llm,
+			cache = False
 		)
 		result = crew.kickoff()
 		return {**state, "history": result}
