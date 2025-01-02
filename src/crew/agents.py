@@ -14,9 +14,9 @@ class InvestigateAgents():
 	def misp_search(self):
 		return Agent(
 			role='MISP Search Specialist',
-			goal='Search for Indicators of Compromise (IOCs) in MISP',
+			goal='Consult MISP platform for a given IOC, and retrieve relevant information',
 			backstory=dedent("""\
-				As a MISP Search Specialist, you are skilled in searching for Indicators of Compromise (IOCs) in MISP (Malware Information Sharing Platform)."""),
+				"You are a MISP Search Specialist skilled at finding security events related to specific IOCs in the Malware Information Sharing Platform."""),
 			verbose=True,
 			llm = self.llm,
 			tools=[MISPSearchTool().search_misp],
@@ -26,7 +26,7 @@ class InvestigateAgents():
 	def virus_total_search(self):
 		return Agent(
 			role='VirusTotal Search Specialist',
-			goal='Search for Indicators of Compromise (IOCs) in VirusTotal',
+			goal='Scan a given IOC in VirusTotal, and return back the scan results',
 			backstory=dedent("""\
 				As a VirusTotal Search Specialist, you are skilled in searching for Indicators of Compromise (e.g. IP addresses, domains, hashes) in VirusTotal."""),
 			verbose=True,

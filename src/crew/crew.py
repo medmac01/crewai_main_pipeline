@@ -28,7 +28,8 @@ class Investigator():
 
 			],
 			name="Investigation process",
-			description="Investigate the provided IOCs using available tools MISP and VirusTotal, then draft a detailed report of the investigation results, which would determine if the IOCs are suspicious or not.",
+			description="Conduct a threat hunting investigation on the provided IOCs using each of the tools available. Then at the end, try to align the tools results with the hypothesis and draft a detailed report of the investigation results based on the",
+			# description="Investigate the provided IOCs using available tools MISP and VirusTotal, then draft a detailed report of the investigation results, which would determine if the established hypothesis is correct or not.",
 			verbose=True,
 			manager_llm=llm,
 			output_log_file="investigation_output.log",
