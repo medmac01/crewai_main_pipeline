@@ -1,57 +1,30 @@
 import json
 from langchain.tools import tool, BaseTool
 import os, requests
+from datetime import datetime
 from langchain_ollama import OllamaLLM
 
+def format_vt_communicating_files(vt_response):
+    # Helper function to convert timestamps to human-readable dates
+    def format_date(timestamp):
+        return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d') if timestamp else "N/A"
 
-def format_virustotal_results(results):
-    """
-    This function takes the raw results from a VirusTotal scan and returns a human-readable string.
-
-    Parameters:
-    results (dict): The raw results from a VirusTotal scan.
-
-    Returns:
-    str: A formatted string summarizing the scan results.
-    """
-    md5 = results.get('md5', 'N/A')
-    sha1 = results.get('sha1', 'N/A')
-    sha256 = results.get('sha256', 'N/A')
-    scan_date = results.get('scan_date', 'N/A')
-    positives = results.get('positives', 'N/A')
-    total = results.get('total', 'N/A')
-    permalink = results.get('permalink', 'N/A')
-
-    formatted_results = [
-        f"VirusTotal Scan Results:",
-        f"========================",
-        f"MD5: {md5}",
-        f"SHA-1: {sha1}",
-        f"SHA-256: {sha256}",
-        f"Scan Date: {scan_date}",
-        f"Detections: {positives}/{total}",
-        f"Detailed Report: {permalink}",
-        "",
-        "Detailed Scan Results:",
-        "======================"
-    ]
-
-    scans = results.get('scans', {})
-    for scanner, scan_data in scans.items():
-        detected = scan_data.get('detected', False)
-        result = scan_data.get('result', 'N/A')
-        version = scan_data.get('version', 'N/A')
-        update = scan_data.get('update', 'N/A')
-
-        formatted_results.append(
-            f"Scanner: {scanner}\n"
-            f"  Detected: {'Yes' if detected else 'No'}\n"
-            f"  Result: {result}\n"
-            f"  Version: {version}\n"
-            f"  Last Update: {update}\n"
-        )
-
-    return "\n".join(formatted_results)
+    formatted_files = []
+    for item in vt_response.get('data', []):
+        attributes = item.get('attributes', {})
+        
+        # Collect relevant fields
+        file_info = {
+            "Scanned": format_date(attributes.get('last_analysis_date', 0)),
+            "Detections": f"{attributes.get('last_analysis_stats', {}).get('malicious', 0)} / {sum(attributes.get('last_analysis_stats', {}).values())}",
+            "Type": attributes.get('type_description', 'N/A'),
+            "Tags": attributes.get('tags', []),
+            "Name": attributes.get('meaningful_name', attributes.get('sha256', 'Unknown'))
+        }
+        
+        formatted_files.append(file_info)
+    
+    return formatted_files
 
 
 class VTTool(BaseTool):
@@ -194,13 +167,13 @@ class VirusTotalTool:
 
         data = response.json()
         
-        llm = OllamaLLM(
-    	# model="ollama/hf.co/MaziyarPanahi/Mistral-Nemo-Instruct-2407-GGUF:Q4_K_M",
-		model="openhermes",
-    	base_url="http://localhost:11434",
-        temperature=0.1,
-        max_tokens=100,
-		)
+        # llm = OllamaLLM(
+    	# # model="ollama/hf.co/MaziyarPanahi/Mistral-Nemo-Instruct-2407-GGUF:Q4_K_M",
+		# model="wrn",
+    	# base_url="http://localhost:11434",
+        # temperature=0.1,
+        # max_tokens=75,
+		# )
         
         aggregated_chunks = f"Scan results for files that communicate with {resource}: \n"
 
@@ -208,7 +181,8 @@ class VirusTotalTool:
             if 'attributes' in data['data'][i] and 'last_analysis_results' in data['data'][i]['attributes']:
                 # Remove 'last_analysis_results' key from attributes
                 del data['data'][i]['attributes']['last_analysis_results']
-                aggregated_chunks += llm.invoke(f"This is a log entry for a VirusTotal scan result. Shorten this log entry keeping only the important information about the result : " + str(data['data'][i])) + "\n"
+                # aggregated_chunks += llm.invoke(f"This is a log entry for a VirusTotal scan result. Shorten this log entry keeping only the important information about the result : " + str(data['data'][i])) + "\n"
                 # aggregated_chunks += llm.invoke(f"The following is a VirusTotal scan for communicating file with the IOC {resource}. Your role is to summarize the result in key bullet points only, while preserving the important information that might help regarding our analysis:" + str(data['data'][i])) + "\n"
+                
     
-        return aggregated_chunks
+        return f"Scan results for files that communicate with {resource}: \n" + str(format_vt_communicating_files(data))
